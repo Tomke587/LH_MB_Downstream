@@ -1,0 +1,71 @@
+---
+title: "4_LHN2DN"
+author: "Tomke Stuerner"
+date: "14/07/2021"
+output: html_document
+---
+
+Downstream of LH and MBON:
+4. LHN to DN 
+  a. LHNs from the currently identified neurons in flywire
+```{r LHNs typed in flywire}
+LHNs = flywire_types[grepl("LH",flywire_types$type),]
+LHN_ids = LHNs$post_id
+length(LHN_ids)
+#  736
+```
+  b. Downstream partners of LHNs (from the identified neurons in flywire)
+```{r downstream partners}
+LHN_partner_summary_out = flywire_partner_summary(LHN_ids, partners = "outputs", details = FALSE) 
+saveRDS(LHN_partner_summary_out, file="LHN_partner_summary_out_05.10.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+```
+
+  c. add types to the downstream partners, remove LHNs and save 
+```{r downstream partner types}
+names(flywire_types)[1] = "post_type"
+names(flywire_types)[2] = "post_id"
+names(LHNs)[1]= "LHN_type"
+names(LHNs)[2]= "query"
+LHN_partner_summary_out_types= left_join(LHN_partner_summary_out, LHNs, by = "query")
+LHN_partner_summary_out_types= left_join(LHN_partner_summary_out_types, flywire_types, by = "post_id")
+LHN_partner_summary_out_types = LHN_partner_summary_out_types[order(-LHN_partner_summary_out_types$weight),]
+```
+```{r look at all that are not LHCENT}
+LHN_partner_summary_out_types2 = LHN_partner_summary_out_types[!LHN_partner_summary_out_types$post_id %in% LHN_ids,]
+LHN_partner_summary_out_types2
+saveRDS(LHN_partner_summary_out_types2, file="LHN_partner_summary_out_types_05.10.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+```
+```{r open saved all that are not PNs}
+LHN_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_types_14.7.Rds'))
+```
+```{r look at all that are weight >50}
+LHN_partner_summary_out_types_50 = subset(LHN_partner_summary_out_types2, LHN_partner_summary_out_types2$weight > 50)
+LHNpartners = unique(LHN_partner_summary_out_types_50$post_id)
+dput(LHNpartners)
+length(LHNpartners)
+# 464?
+```
+
+  c. Look at direct downstream DNs and save them
+```{r DNs directly downstream}
+intersection = LHN_partner_summary_out_types2$post_id %in% p_DNid
+length(intersection[intersection==TRUE])
+directDN_con = LHN_partner_summary_out_types2[intersection,]
+# 678
+# weight >10
+directDN_con10 = subset(directDN_con, directDN_con$weight > 10)
+directDN_con10u = unique(directDN_con10$post_id)
+length(directDN_con10u)
+# 59 direct DNs downstream of LHNs
+saveRDS(directDN_con10, file="LHN_directDN_con.05.10.Rds", version = NULL,
+         compress = TRUE, refhook = NULL)
+```
+```{r open saved DNs directly downstream}
+directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_directDN_con.Rds")
+```
+
+```{r plot 63 direct LH DNs}
+directDN_con10
+```

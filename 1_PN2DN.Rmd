@@ -1,0 +1,85 @@
+---
+title: "1_PN2DN"
+author: "Tomke Stuerner"
+date: "14/07/2021"
+output: html_document
+---
+
+Downstream of LH and MBON:
+1. PN to DN (Look into the most direct pathway between PN output to DNs)
+  a. take PNs from the identified neurons in flywire
+```{r PNs typed in flywire}
+PNs = flywire_types[grepl("PN",flywire_types$type),]
+PN_ids = PNs$post_id
+length(PN_ids)
+# 389
+```
+  b. partners downstream
+```{r downstream partners}
+PN_partner_summary_out = flywire_partner_summary(PN_ids, partners = "outputs", details = FALSE) 
+# PN_partner_summary_out1 = flywire_partner_summary(PN_ids[0:100], partners = "outputs", details = FALSE) 
+# PN_partner_summary_out2 = flywire_partner_summary(PN_ids[101:200], partners = "outputs", details = FALSE) 
+# PN_partner_summary_out3 = flywire_partner_summary(PN_ids[201:300], partners = "outputs", details = FALSE) 
+# PN_partner_summary_out4 = flywire_partner_summary(PN_ids[301:length(PN_ids)], partners = "outputs", details = FALSE) 
+# PN_partner_summary_out = bind_rows(PN_partner_summary_out1, PN_partner_summary_out2, PN_partner_summary_out3, PN_partner_summary_out4)
+```
+  c. add types to the downstream partners, remove PNs and save
+```{r downstream partner types}
+names(flywire_types)[1] = "post_type"
+names(flywire_types)[2] = "post_id"
+names(PNs)[1]= "PN_type"
+names(PNs)[2]= "query"
+PN_partner_summary_out_types= left_join(PN_partner_summary_out, PNs, by = "query")
+PN_partner_summary_out_types= left_join(PN_partner_summary_out_types, flywire_types, by = "post_id")
+PN_partner_summary_out_types = PN_partner_summary_out_types[order(-PN_partner_summary_out_types$weight),]
+PN_partner_summary_out_types
+```
+```{r look at all that are not PNs}
+PN_partner_summary_out_types2 = PN_partner_summary_out_types[!PN_partner_summary_out_types$post_id %in% PN_ids,]
+saveRDS(PN_partner_summary_out_types2, file="PN_partner_summary_out_types_05.10.Rds", version = NULL,
+          compress = TRUE, refhook = NULL)
+PN_partner_summary_out_types2
+```
+```{r open saved all that are not PNs}
+PN_partner_summary_out_types2 <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/PN_partner_summary_out_types_05.10.Rds")
+```
+```{r look weight >50}
+PN_partner_summary_out_types_50 = subset(PN_partner_summary_out_types2, PN_partner_summary_out_types2$weight > 50)
+PN_partner_summary_out_types_50
+PNpartners = unique(PN_partner_summary_out_types_50$post_id)
+dput(PNpartners)
+length(PNpartners)
+# 
+```
+
+  d. save all direct DNs downstream
+```{r DNs directly downstream}
+intersection = PN_partner_summary_out_types2$post_id %in% p_DNid
+length(intersection[intersection==TRUE])
+PN_directDN_con = PN_partner_summary_out_types2[intersection,]
+saveRDS(PN_directDN_con, file="PN_directDN_con_05.10.Rds", version = NULL,
+          compress = TRUE, refhook = NULL)
+PN_directDN_con
+```
+```{r open saved DNs directly downstream}
+# PN_directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/PN_directDN_con.Rds")
+```
+```{r weight > 10}
+PN_directDN_con = subset(PN_directDN_con, PN_directDN_con$weight > 10)
+PN_directDN_con_u = subset(PN_directDN_con, select = c(post_id, type, xyz.y))
+PN_directDN_con_u = unique(PN_directDN_con_u)
+nrow(PN_directDN_con_u)
+write.csv(PN_directDN_con_u, file= "PN_directDN_con_u_05.10.csv")
+# 35 unique DNs directly downstream of PNs
+```
+```{r PN to DN}
+# with the cleft threshold applied at 30
+# PN_DN=flywire_adjacency_matrix(inputids=PN_directDN_con$query, outputids=PN_directDN_con$post_id, cleft.threshold = 30)
+# h = heatmap(PN_DN, scale='none')
+# directly from the dataframe, weight > 10
+PN_directDN_con_plot = mutate(PN_directDN_con, PN = paste(PN_type,query))
+PN_directDN_con_plot = mutate(PN_directDN_con_plot, DN = paste(type,post_id))
+PN_DN_plot= ggplot(PN_directDN_con_plot, aes(x = PN, y = DN, fill = weight, )) +   geom_tile()+ theme(text = element_text(size=8),axis.text.x = element_text(angle=90, hjust=1), axis.text.y = element_text(hjust=1))
+ggsave("PN_DN_10_plot_05.10.png")
+PN_DN_plot
+```

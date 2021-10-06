@@ -1,0 +1,50 @@
+---
+title: "2_MBON2DN"
+author: "Tomke Stuerner"
+date: "14/07/2021"
+output: html_document
+---
+
+Downstream of LH and MBON:
+2. MBON to DN 
+  a. Downstream partners of MBONs (from the identified neurons in flywire)
+```{r downstream partners}
+MBON_partner_summary_out = flywire_partner_summary(MBONid, partners = "outputs") #get a list of downstream partner with n synapse connected
+# write.csv(MBON_partner_summary_out, file = "MBON_partner_summary_out.csv")
+# MBON_partner_summary = read.csv("/Users/tomke/Documents/MBON_to_DN/MBON_partner_summary.csv")
+length(MBONname$post_id)
+```
+  b. add types to the downstream partners, remove MBONs and save 
+```{r downstream partner types}
+names(flywire_types)[1] = "post_type"
+names(flywire_types)[2] = "post_id"
+names(MBONname)[1]= "MBON_type"
+names(MBONname)[2]= "query"
+MBON_partner_summary_out_types = left_join(MBON_partner_summary_out, MBONname, by = "query")
+MBON_partner_summary_out_types= left_join(MBON_partner_summary_out_types, flywire_types, by = "post_id")
+MBON_partner_summary_out_types = MBON_partner_summary_out_types[order(-MBON_partner_summary_out_types$weight),]
+MBON_partner_summary_out_types
+# saveRDS(MBON_partner_summary_out_types, file="MBON_partner_summary_out_types_14.7.Rds", version = NULL,
+         # compress = TRUE, refhook = NULL)
+```
+```{r look at all that are not MBONs}
+MBON_partner_summary_out_types2 = MBON_partner_summary_out_types[!MBON_partner_summary_out_types$post_id %in% MBONid,]
+MBON_partner_summary_out_types2
+saveRDS(MBON_partner_summary_out_types2, file="MBON_partner_summary_out_types_21.7.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+```
+```{r open saved all that are not PNs}
+MBON_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/MBON_partner_summary_out_types_14.7.Rds'))
+```
+
+  c. Look at direct downstream DNs and save them
+```{r DNs directly downstream}
+intersection = MBON_partner_summary_out_types2$post_id %in% DNname$post_id
+length(intersection[intersection==TRUE])
+directDN_con = MBON_partner_summary_out_types2[intersection,]
+saveRDS(directDN_con, file="MBON_directDN_con.Rds", version = NULL,
+         compress = TRUE, refhook = NULL)
+```
+```{r open saved DNs directly downstream}
+directDN_con <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/MBON_directDN_con.Rds'))
+```

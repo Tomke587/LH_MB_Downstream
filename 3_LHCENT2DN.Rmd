@@ -1,0 +1,57 @@
+---
+title: "3_LHCENT2DN"
+author: "Tomke Stuerner"
+date: "14/07/2021"
+output: html_document
+---
+
+Downstream of LH and MBON:
+3. LHCENT to DN 
+  a. Downstream partners of LHCENTs (from the identified neurons in flywire)
+```{r downstream partners}
+LHCENT_partner_summary_out = flywire_partner_summary(LHCENTid, partners = "outputs", details = FALSE) 
+length(LHCENTid)
+# 48
+# write.csv(LHCENT_partner_summary_out, file = "LHCENT_partner_summary_out.csv")
+# LHCENT_partner_summary = read.csv("/Users/tomke/Documents/LHCENT_to_DN/LHCENT_partner_summary.csv")
+```
+  b. add types to the downstream partners, remove LHCENTs and save 
+```{r downstream partner types}
+names(flywire_types)[1] = "post_type"
+names(flywire_types)[2] = "post_id"
+names(LHCENTname)[1]= "LHCENT_type"
+names(LHCENTname)[2]= "query"
+LHCENT_partner_summary_out_types= left_join(LHCENT_partner_summary_out, LHCENTname, by = "query")
+LHCENT_partner_summary_out_types= left_join(LHCENT_partner_summary_out_types, flywire_types, by = "post_id")
+LHCENT_partner_summary_out_types = LHCENT_partner_summary_out_types[order(-LHCENT_partner_summary_out_types$weight),]
+```
+```{r look at all that are not LHCENT}
+LHCENT_partner_summary_out_types2 = LHCENT_partner_summary_out_types[!LHCENT_partner_summary_out_types$post_id %in% LHCENTid,]
+LHCENT_partner_summary_out_types2
+saveRDS(LHCENT_partner_summary_out_types2, file="LHCENT_partner_summary_out_types_14.7.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+nrow(LHCENT_partner_summary_out_types2)
+```
+```{r open saved all that are not PNs}
+LHCENT_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/LHCENT_partner_summary_out_types_14.7.Rds'))
+```
+```{r look at all that are weight >50}
+LHCENT_partner_summary_out_types_50 = subset(LHCENT_partner_summary_out_types2, LHCENT_partner_summary_out_types2$weight > 50)
+LHCENTpartners = unique(LHCENT_partner_summary_out_types_50$post_id)
+dput(LHCENTpartners)
+length(LHCENTpartners)
+# 185
+```
+
+  c. Look at direct downstream DNs and save them
+```{r DNs directly downstream}
+intersection = LHCENT_partner_summary_out_types2$post_id %in% p_DNid
+length(intersection[intersection==TRUE])
+directDN_con = LHCENT_partner_summary_out_types2[intersection,]
+saveRDS(directDN_con, file="LHCENT_directDN_con.Rds", version = NULL,
+         compress = TRUE, refhook = NULL)
+nrow(directDN_con)
+```
+```{r open saved DNs directly downstream}
+directDN_con <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LHCENT_directDN_con.Rds'))
+```
