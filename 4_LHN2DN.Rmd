@@ -12,13 +12,21 @@ Downstream of LH and MBON:
 LHNs = flywire_types[grepl("LH",flywire_types$type),]
 LHN_ids = LHNs$post_id
 length(LHN_ids)
-#  736
+LHNs
+#  776
 ```
+
   b. Downstream partners of LHNs (from the identified neurons in flywire)
 ```{r downstream partners}
 LHN_partner_summary_out = flywire_partner_summary(LHN_ids, partners = "outputs", details = FALSE) 
 saveRDS(LHN_partner_summary_out, file="LHN_partner_summary_out_05.10.Rds", version = NULL,
         compress = TRUE, refhook = NULL)
+LHN_partner_summary_out
+# LHN_partner_summary_out <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_05.10.Rds'))
+```
+remove LHCENT
+```{r Remove LHCENTS from the LHN list}
+LHN_partner_summary_out = subset(LHN_partner_summary_out, (!LHN_partner_summary_out$query %in% LHCENTid))
 ```
 
   c. add types to the downstream partners, remove LHNs and save 
@@ -38,14 +46,14 @@ saveRDS(LHN_partner_summary_out_types2, file="LHN_partner_summary_out_types_05.1
         compress = TRUE, refhook = NULL)
 ```
 ```{r open saved all that are not PNs}
-LHN_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_types_14.7.Rds'))
+LHN_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_types_05.10.Rds'))
 ```
 ```{r look at all that are weight >50}
 LHN_partner_summary_out_types_50 = subset(LHN_partner_summary_out_types2, LHN_partner_summary_out_types2$weight > 50)
 LHNpartners = unique(LHN_partner_summary_out_types_50$post_id)
-dput(LHNpartners)
+# dput(LHNpartners)
 length(LHNpartners)
-# 464?
+# 316
 ```
 
   c. Look at direct downstream DNs and save them
@@ -53,17 +61,17 @@ length(LHNpartners)
 intersection = LHN_partner_summary_out_types2$post_id %in% p_DNid
 length(intersection[intersection==TRUE])
 directDN_con = LHN_partner_summary_out_types2[intersection,]
-# 678
+# 760
 # weight >10
 directDN_con10 = subset(directDN_con, directDN_con$weight > 10)
 directDN_con10u = unique(directDN_con10$post_id)
 length(directDN_con10u)
-# 59 direct DNs downstream of LHNs
+# 58 direct DNs downstream of LHNs
 saveRDS(directDN_con10, file="LHN_directDN_con.05.10.Rds", version = NULL,
          compress = TRUE, refhook = NULL)
 ```
 ```{r open saved DNs directly downstream}
-directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_directDN_con.Rds")
+directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_directDN_con.05.10.Rds")
 ```
 
 ```{r plot 63 direct LH DNs}

@@ -29,7 +29,10 @@ rgl_rect = c(0L, 45L, 1171L, 823L)
 choose_segmentation("flywire31")
 catmaid_login() #this only works if you have your credentials saved in your environment
 
-# get all flywire neurons currently matched/typed
+# load flywiretypes
+flywire_types <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/flywire_types_05.10.Rds")
+
+# OR update them: get all flywire neurons currently matched/typed
 # MBONs
 gs4_auth("ts587@cam.ac.uk")
 MBON = read_sheet("1BfYo4AspojLNMAvoE5VjGlpO3Vxu8R95B21wHfKf0Mg")
@@ -147,4 +150,7 @@ flywire_types_all= bind_rows(MBONname, LHCENTname, DNname, ANname, matchesname, 
 # flywire_types= unique(flywire_types)
 flywire_types= flywire_types_all%>% distinct(post_id, .keep_all = TRUE)
 nrow(flywire_types)
+saveRDS(flywire_types, file="flywire_types_05.10.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+
 # 5239 typed flywire neurons
