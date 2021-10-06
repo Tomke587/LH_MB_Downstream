@@ -1,0 +1,37 @@
+---
+title: "LAL_DN"
+author: "Tomke Stuerner"
+date: "13/09/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. All DNs with connections in the LAL region
+2. Look at the upstream connection to MBON and LHON
+
+There are currently 1325 DNs in the FAFB dataset
+```{r DNs, partially typed in flywire}
+nrow(DNname)
+# 1325 DNs 
+load meshes
+DN1.fwm=read_cloudvolume_meshes(DNname$post_id[1:10])
+```
+
+```{r plot fywire mesh}
+nclear3d()
+plot3d(DN1.fwm, col='red', lwd=3)
+nlscan(DN1.fwm, col = 'black', lwd=2)
+# wire3d(DN1.fwm[[1]], col='grey', alpha=.2)
+```
+
+```{r LAL mesh}
+nrow(DNname)
+# 1325
+```
+
+```{r DNs in LAL mesh}
+
+```
