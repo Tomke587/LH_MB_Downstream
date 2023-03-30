@@ -12,7 +12,7 @@ Downstream of LH and MBON:
 PNs = flywire_types[grepl("PN",flywire_types$type),]
 PN_ids = PNs$post_id
 length(PN_ids)
-# 389
+# 696 PNs
 ```
   b. partners downstream
 ```{r downstream partners}
@@ -62,7 +62,7 @@ saveRDS(PN_directDN_con, file="PN_directDN_con_05.10.Rds", version = NULL,
 PN_directDN_con
 ```
 ```{r open saved DNs directly downstream}
-# PN_directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/PN_directDN_con.Rds")
+PN_directDN_con <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/PN_directDN_con.Rds")
 ```
 ```{r weight > 10}
 PN_directDN_con = subset(PN_directDN_con, PN_directDN_con$weight > 10)
@@ -71,6 +71,7 @@ PN_directDN_con_u = unique(PN_directDN_con_u)
 nrow(PN_directDN_con_u)
 write.csv(PN_directDN_con_u, file= "PN_directDN_con_u_05.10.csv")
 # 35 unique DNs directly downstream of PNs
+PN_directDN_con
 ```
 ```{r PN to DN}
 # with the cleft threshold applied at 30

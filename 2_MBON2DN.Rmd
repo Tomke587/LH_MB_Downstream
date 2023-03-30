@@ -9,33 +9,35 @@ Downstream of LH and MBON:
 2. MBON to DN 
   a. Downstream partners of MBONs (from the identified neurons in flywire)
 ```{r downstream partners}
-MBON_partner_summary_out = flywire_partner_summary(MBONid, partners = "outputs") #get a list of downstream partner with n synapse connected
+MBONs = MBONname[grepl("MBON", MBONname$type),]
+MBON_partner_summary_out = flywire_partner_summary(MBONs$post_id, partners = "outputs") #get a list of downstream partner with n synapse connected
 # write.csv(MBON_partner_summary_out, file = "MBON_partner_summary_out.csv")
 # MBON_partner_summary = read.csv("/Users/tomke/Documents/MBON_to_DN/MBON_partner_summary.csv")
-length(MBONname$post_id)
-# 84
+nrow(MBONs)
+# 82
 ```
   b. add types to the downstream partners, remove MBONs and save 
 ```{r downstream partner types}
 names(flywire_types)[1] = "post_type"
 names(flywire_types)[2] = "post_id"
-names(MBONname)[1]= "MBON_type"
-names(MBONname)[2]= "query"
-MBON_partner_summary_out_types = left_join(MBON_partner_summary_out, MBONname, by = "query")
+names(MBONs)[1]= "MBON_type"
+names(MBONs)[2]= "query"
+MBON_partner_summary_out_types = left_join(MBON_partner_summary_out, MBONs, by = "query")
 MBON_partner_summary_out_types= left_join(MBON_partner_summary_out_types, flywire_types, by = "post_id")
 MBON_partner_summary_out_types = MBON_partner_summary_out_types[order(-MBON_partner_summary_out_types$weight),]
 MBON_partner_summary_out_types
-saveRDS(MBON_partner_summary_out_types, file="MBON_partner_summary_out_types_06.10.Rds", version = NULL,
+saveRDS(MBON_partner_summary_out_types, file="MBON_partner_summary_out_types_06.12.Rds", version = NULL,
           compress = TRUE, refhook = NULL)
 ```
 ```{r look at all that are not MBONs}
-MBON_partner_summary_out_types2 = MBON_partner_summary_out_types[!MBON_partner_summary_out_types$post_id %in% MBONid,]
+MBON_partner_summary_out_types2 = MBON_partner_summary_out_types[!MBON_partner_summary_out_types$post_id %in% MBONs$query,]
 MBON_partner_summary_out_types2
-saveRDS(MBON_partner_summary_out_types2, file="MBON_partner_summary_out_types_06.10.Rds", version = NULL,
+saveRDS(MBON_partner_summary_out_types2, file="MBON_partner_summary_out_types_06.12.Rds", version = NULL,
         compress = TRUE, refhook = NULL)
+write.csv(MBON_partner_summary_out_types2, file="MBON_partner_summary_out_types_06.12.csv")
 ```
 ```{r open saved all that are not PNs}
-MBON_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/MBON_partner_summary_out_types_06.10.Rds'))
+MBON_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/LH_MB_Downstream/MBON_partner_summary_out_types_06.12.Rds'))
 ```
 
   c. Look at direct downstream DNs and save them
@@ -43,10 +45,20 @@ MBON_partner_summary_out_types2 <- readRDS(file = paste0(here::here(),'/Users/to
 intersection = MBON_partner_summary_out_types2$post_id %in% DNname$post_id
 length(intersection[intersection==TRUE])
 directDN_con = MBON_partner_summary_out_types2[intersection,]
-saveRDS(directDN_con, file="MBON_directDN_con_06.10.Rds", version = NULL,
+saveRDS(directDN_con, file="MBON_directDN_con_06.12.Rds", version = NULL,
          compress = TRUE, refhook = NULL)
-directDN_con
+write.csv(directDN_con, file="MBON_directDN_con_06.12.csv")
+# saveRDS(directDN_con, file="MBON_directDN_con_06.12.Rds", version = NULL,
+         # compress = TRUE, refhook = NULL)
+# plot top
+directDN_con_plot = as.data.frame(directDN_con)
+directDN_con_plot = subset(directDN_con_plot, directDN_con_plot$weight > 20)
+directDN_con_plot$MBON = paste(directDN_con_plot$MBON_type, directDN_con_plot$query, sep = "_")
+directDN_con_plot$partner = paste(directDN_con_plot$post_type, directDN_con_plot$post_id, sep = "_")
+ggplot(directDN_con_plot, aes(x = MBON, y = partner, fill = weight, )) +   geom_tile()+ theme(text = element_text(size=8),axis.text.x = element_text(angle=90, hjust=1), axis.text.y = element_text(hjust=1))
+directDN_con_plot
+ggsave("MBON_directDN_con_06.12_w20.png")
 ```
 ```{r open saved DNs directly downstream}
-directDN_con <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/MBON_directDN_con_06.10.Rds'))
+directDN_con <- readRDS(file = paste0(here::here(),'/Users/tomke/Documents/dev/MBON_directDN_con_06.12.Rds'))
 ```

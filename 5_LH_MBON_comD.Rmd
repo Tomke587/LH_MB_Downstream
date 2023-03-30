@@ -8,13 +8,14 @@ Downstream of LH and MBON:
 5. Common downstream partners of PNs and MBONs
 6. Common downstream partners of LHNs and MBONs
 ```{r load downstream of PN, LHN and MBON}
-MBON_partners <- readRDS(file = "/Users/tomke/Documents/dev/LH_MB_Downstream/MBON_partner_summary_out_types_06.10.Rds")
+MBON_partners <- readRDS(file = "/Users/tomke/Documents/dev/LH_MB_Downstream/MBON_partner_summary_out_types_06.12.Rds")
 PN_partners <- readRDS(file = "/Users/tomke/Documents/dev/LH_MB_Downstream/PN_partner_summary_out_types_05.10.Rds")
-LHN_partners <- readRDS(file = "/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_types_05.10.Rds")
+LHN_partners <- readRDS(file = "/Users/tomke/Documents/dev/LH_MB_Downstream/LHN_partner_summary_out_types_06.12.Rds")
 ```
-remove LHCENT
+remove LHCENT and APL
 ```{r Remove LHCENTS from the LHN list}
 LHN_partners = subset(LHN_partners, (!LHN_partners$query %in% LHCENTid))
+MBON_partners = subset(MBON_partners, (!MBON_partners$MBON_type == "APL"))
 ```
 
 ```{r look at weight >10}
@@ -28,7 +29,7 @@ LHN_partners_10 = subset(LHN_partners, LHN_partners$weight > 10)
 PN_MBON_common_partners_10_df = inner_join(PN_partners_10, MBON_partners_10, by = "post_id")
 PN_MBON_common_partners_10_df
 PN_MBON_common_partners_10_df = subset(PN_MBON_common_partners_10_df, select = -c(post_type, xyz.y.y) )
-saveRDS(PN_MBON_common_partners_10_df, file="PN_MBON_common_partners_10_df_06.10.Rds", version = NULL,
+saveRDS(PN_MBON_common_partners_10_df, file="PN_MBON_common_partners_10_df_27.10.Rds", version = NULL,
         compress = TRUE, refhook = NULL)
 ```
 ```{r load}
@@ -45,7 +46,7 @@ PN_MBON_common_partners_10
 # look at the unique ids
 PN_MBON_common_partners_10_u = unique(PN_MBON_common_partners_10$post_id)
 length(PN_MBON_common_partners_10_u)
-# 2444 common partners downstream of PN and MBONs
+# 241 common partners downstream of PN and MBONs
 PN_MBON_common_partners_10_u
 ```
 DNs
@@ -71,7 +72,7 @@ PN_MBON_common_partners_10_DN
 LHN_MBON_common_partners_10_df = inner_join(LHN_partners_10, MBON_partners_10, by = "post_id")
 LHN_MBON_common_partners_10_df
 LHN_MBON_common_partners_10_df = subset(LHN_MBON_common_partners_10_df, select = -c(post_type.y, xyz.y.y) )
-saveRDS(LHN_MBON_common_partners_10_df, file="LHN_MBON_common_partners_10_df_06.10.Rds", version = NULL,
+saveRDS(LHN_MBON_common_partners_10_df, file="LHN_MBON_common_partners_10_df_06.12.Rds", version = NULL,
         compress = TRUE, refhook = NULL)
 ```
 
@@ -90,7 +91,15 @@ names(LHN_MBON_common_partners_10)[7] = "weight_LHN"
 names(LHN_MBON_common_partners_10)[11] = "weight_MBON"
 LHN_MBON_common_partners_10 = mutate(LHN_MBON_common_partners_10, weight = ((weight_LHN + weight_MBON)/2)) # average the weight of MBON and PN
 LHN_MBON_common_partners_10 = LHN_MBON_common_partners_10[order(-LHN_MBON_common_partners_10$weight),] # sort by that weight to see the top targets
-LHN_MBON_common_partners_10
+saveRDS(LHN_MBON_common_partners_10, file="LHN_MBON_common_partners_10_df_sorted_06.12.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+write.csv(LHN_MBON_common_partners_10, file="LHN_MBON_common_partners_10_df_sorted_06.12.csv")
+# remove APL
+LHN_MBON_common_partners_10_nAPL = subset(LHN_MBON_common_partners_10, LHN_MBON_common_partners_10$post_id != "720575940618597541")
+saveRDS(LHN_MBON_common_partners_10_nAPL, file="LHN_MBON_common_partners_10_df_sorted_06.12_nAPL.Rds", version = NULL,
+        compress = TRUE, refhook = NULL)
+write.csv(LHN_MBON_common_partners_10_nAPL, file="LHN_MBON_common_partners_10_df_sorted_06.12_nAPL.csv")
+LHN_MBON_common_partners_10_nAPL
 ```
 ```{r check if there are more types now known}
 # take all with type NA
@@ -131,19 +140,20 @@ LHN_MBON_common_partners_10_dfn= LHN_MBON_common_partners_10_df %>%
 ```
 ```{r top partner ids}
 # look at the unique ids
-LHN_MBON_common_partners_10_u = subset(LHN_MBON_common_partners_10, select = c(post_id, post_type, xyz))
+LHN_MBON_common_partners_10_u = subset(LHN_MBON_common_partners_10_nAPL, select = c(post_id, post_type, xyz))
 LHN_MBON_common_partners_10_u = unique(LHN_MBON_common_partners_10_u)
 nrow(LHN_MBON_common_partners_10_u)
-write.csv(LHN_MBON_common_partners_10_u, file = "LHN_MBON_common_partners_10_u_06.10.csv")
-nrow(LHN_MBON_common_partners_10_u) 
+# 910
+write.csv(LHN_MBON_common_partners_10_u, file = "LHN_MBON_common_partners_10_u_06.12.csv")
 LHN_MBON_common_partners_10_u
-# 345 common partners downstream of LHN and MBONs
+
 ```
 # https://ngl.flywire.ai/?json_url=https://globalv1.flywire-daf.com/nglstate/5792414761484288
 ```{r top 20 convergence neurons}
 top20_ids = LHN_MBON_common_partners_10_u$post_id[1:20]
 # which LH and MBON neurons conenct to the the direct DNs
 LHN_MBON_c20_df = subset(LHN_MBON_common_partners_10_df, LHN_MBON_common_partners_10_df$post_id %in% top20_ids) 
+LHN_MBON_c20_df
 LHN_MBON_c20_dfx = subset(LHN_MBON_c20_df, select = c(query.x, post_type.x, post_id, weight.x, LHN_type))
 LHN_MBON_c20_dfy = subset(LHN_MBON_c20_df, select = c(query.y, post_type.x, post_id, weight.y, MBON_type))
 names(LHN_MBON_c20_dfx)[1]= 'query'
@@ -160,14 +170,15 @@ LHN_MBON_c20_df_sep$post_type.x = as.character(LHN_MBON_c20_df_sep$post_type.x)
 LHN_MBON_c20_df_sep$post_id = as.character(LHN_MBON_c20_df_sep$post_id)
 LHN_MBON_c20_df_sep1= mutate(LHN_MBON_c20_df_sep, post_type = paste(post_type.x,post_id))
 
-LHN_MBON_c20_plot= ggplot(LHN_MBON_c20_df_sep1, aes(x = post_type, y = type, fill = weight, )) +   geom_tile()+ theme(text = element_text(size=8),axis.text.x = element_text(angle=90, hjust=1), axis.text.y = element_text(hjust=1))
-ggsave("LHN_MBON_c20_plot_06.10.png")
+LHN_MBON_c20_plot= ggplot(LHN_MBON_c20_df_sep1, aes(x = post_type, y = type, fill = weight, )) +   geom_tile()+ theme(text = element_text(size=5),axis.text.x = element_text(angle=90, hjust=1), axis.text.y = element_text(hjust=1))
+ggsave("LHN_MBON_c20_plot_06.12.png")
 LHN_MBON_c20_plot
 ```
 # https://ngl.flywire.ai/?json_url=https://globalv1.flywire-daf.com/nglstate/6433939799408640
 ```{r top 50 convergence neurons}
 top50_ids = LHN_MBON_common_partners_10_u$post_id[1:50]
 LHN_MBON_c50_df = subset(LHN_MBON_common_partners_10_df, LHN_MBON_common_partners_10_df$post_id %in% top50_ids) 
+LHN_MBON_c50_df
 LHN_MBON_c50_dfx = subset(LHN_MBON_c50_df, select = c(query.x, post_type.x, post_id, weight.x, LHN_type))
 LHN_MBON_c50_dfy = subset(LHN_MBON_c50_df, select = c(query.y, post_type.x, post_id, weight.y, MBON_type))
 names(LHN_MBON_c50_dfx)[1]= 'query'
@@ -183,9 +194,9 @@ LHN_MBON_c50_df_sep = unique(LHN_MBON_c50_df_sep)
 LHN_MBON_c50_df_sep$post_type.x = as.character(LHN_MBON_c50_df_sep$post_type.x)
 LHN_MBON_c50_df_sep$post_id = as.character(LHN_MBON_c50_df_sep$post_id)
 LHN_MBON_c50_df_sep1= mutate(LHN_MBON_c50_df_sep, post_type = paste(post_type.x,post_id))
-
-LHN_MBON_c50_plot= ggplot(LHN_MBON_c50_df_sep1, aes(x = post_type, y = type, fill = weight, )) +   geom_tile()+ theme(text = element_text(size=5),axis.text.x = element_text(angle=90, hjust=1.0), axis.text.y = element_text(hjust=1.0))
-ggsave("LHN_MBON_c50_plot_06.10.png")
+options(repr.plot.width = 14, repr.plot.height = 14)
+LHN_MBON_c50_plot = ggplot(LHN_MBON_c50_df_sep1, aes(x = post_type, y = type, fill = weight)) +   geom_tile()+ theme(text = element_text(size=3),axis.text.x = element_text(angle=90, hjust=1.0), axis.text.y = element_text(hjust=1.0)) 
+ggsave("LHN_MBON_c50_plot_06.12.png")
 LHN_MBON_c50_plot
 ```
 DNs
@@ -196,11 +207,16 @@ LHN_MBON_common_partners_10_DN = subset(LHN_MBON_common_partners_10, LHN_MBON_co
 nrow(LHN_MBON_common_partners_10_DN)
 # 2 DNp09: LHAD1g1/LHAV1a5 with MBON20 but very low weight (12,14,36)
 LHN_MBON_common_partners_10_DN
+
+LHN_MBON_common_partners_10_DN_u = unique(LHN_MBON_common_partners_10_DN$post_id)
+length(LHN_MBON_common_partners_10_DN_u)
+LHN_MBON_common_partners_10_DN_u
+# 42 DNs
 ```
 
 ```{r LH and MBON direct DNs}
-# which LH and MBON neurons conenct to the the direct DNs
-LHN_MBON_DN_df = subset(LHN_MBON_common_partners_10_df, LHN_MBON_common_partners_10_df$post_id %in% LHN_MBON_common_partners_10_DN_u$post_id) 
+# which LH and MBON neurons connect to the the direct DNs
+LHN_MBON_DN_df = subset(LHN_MBON_common_partners_10_df, LHN_MBON_common_partners_10_df$post_id %in% LHN_MBON_common_partners_10_DN$post_id) 
 LHN_MBON_DN_dfx = subset(LHN_MBON_DN_df, select = c(query.x, post_id, weight.x, LHN_type, post_type.x))
 LHN_MBON_DN_dfy = subset(LHN_MBON_DN_df, select = c(query.y, post_id, weight.y, MBON_type, post_type.x))
 names(LHN_MBON_DN_dfx)[1]= 'query'

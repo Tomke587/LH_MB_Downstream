@@ -9,9 +9,10 @@ Downstream of LH and MBON:
 3. LHCENT to DN 
   a. Downstream partners of LHCENTs (from the identified neurons in flywire)
 ```{r downstream partners}
-LHCENT_partner_summary_out = flywire_partner_summary(LHCENTid, partners = "outputs", details = FALSE) 
-length(LHCENTid)
-# 48
+LHCENTs = LHCENTname[grepl("LHCENT", LHCENTname$type),]
+LHCENT_partner_summary_out = flywire_partner_summary(LHCENTs$post_id, partners = "outputs", details = FALSE) 
+nrow(LHCENTs)
+# 45
 # write.csv(LHCENT_partner_summary_out, file = "LHCENT_partner_summary_out.csv")
 # LHCENT_partner_summary = read.csv("/Users/tomke/Documents/LHCENT_to_DN/LHCENT_partner_summary.csv")
 ```

@@ -1,36 +1,8 @@
 # SET UP
 
-library(hemibrainr)
-library(natverse)
-library(fafbseg)
-library(reticulate)
-library(googlesheets4)
-library(dplyr)
-library(neuprintr)
-# library(catmaid)
-# library(devtools)
-# library(plotly)
-# library(stringr)
-library(ggplot2)
-# library(nat.jrcbrains)
-# library(rgl)
-# library(forcats)
-# library(stats)
-
-# RGL Usermat
-rgl_usermat = structure(c(0.98662239,  -0.1360703,  0.08978364, 0, 
-                          0.06441419,  -0.1805410, -0.98145604, 0, 
-                          0.14975676,   0.9741101, -0.16936085, 0, 
-                          0,            0,          0,          1), .Dim = c(4L, 4L))
-rgl_zoom = 1
-rgl_rect = c(0L, 45L, 1171L, 823L)
-
-# flywire setup
-choose_segmentation("flywire31")
-catmaid_login() #this only works if you have your credentials saved in your environment
 
 # load flywiretypes
-flywire_types <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/flywire_types_05.10.Rds")
+flywire_types <- readRDS(file ="/Users/tomke/Documents/dev/LH_MB_Downstream/flywire_types_22.10.Rds")
 
 # OR update them: get all flywire neurons currently matched/typed
 # MBONs
@@ -73,7 +45,7 @@ names(DNname)[2] = "post_id"
 names(DNname)[3] = "xyz"
 # add specific type names if available
 gs4_auth("ts587@cam.ac.uk")
-DN_types = read_sheet("1M-2U0zV_T6BkdQZuZ2qVBGz6F_PD71MH0p5CJ71G38g", sheet = "matching")
+DN_types = read_sheet("1M-2U0zV_T6BkdQZuZ2qVBGz6F_PD71MH0p5CJ71G38g", sheet = "DN_info")
 DN_types_idsR = tibble(DN_types$DN_name, DN_types$RHS_newest_ID)
 DN_types_idsL = tibble(DN_types$DN_name, DN_types$LHS_newest_ID)
 names(DN_types_idsR)[1] = "type"
@@ -150,7 +122,9 @@ flywire_types_all= bind_rows(MBONname, LHCENTname, DNname, ANname, matchesname, 
 # flywire_types= unique(flywire_types)
 flywire_types= flywire_types_all%>% distinct(post_id, .keep_all = TRUE)
 nrow(flywire_types)
-saveRDS(flywire_types, file="flywire_types_05.10.Rds", version = NULL,
+saveRDS(flywire_types, file="flywire_types_06.12.Rds", version = NULL,
         compress = TRUE, refhook = NULL)
 
-# 5239 typed flywire neurons
+# 5276 typed flywire neurons
+# 5116 typed flywire neurons 22.10.
+# 7511 typed flywire neurons 06.12.
